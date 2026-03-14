@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>WhatsApp Bot | Order Automation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #09090b;
+      color: #fafafa;
+      font-family: "Inter", sans-serif;
+    }
+
+    .nav-item.active {
+      background: #27272a;
+      color: #fff;
+    }
+
+    .card {
+      background: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+    }
+
+    .sidebar {
+      width: 260px;
+      border-right: 1px solid #27272a;
+    }
+
+    /* Custom scrollbar for dark mode */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+  <!-- Sidebar -->
+  <aside class="sidebar flex flex-col p-6">
+    <div class="flex items-center gap-3 mb-10 px-2">
+      <div class="bg-green-600 p-2 rounded-lg text-white">
+        <i class="lucide-message-square w-5 h-5"></i>
+      </div>
+      <div class="leading-tight">
+        <h1 class="font-bold text-sm">WhatsApp Bot</h1>
+        <p class="text-[10px] text-zinc-500 uppercase tracking-wider">
+          Order Automation
+        </p>
+      </div>
+    </div>
+
+    <nav class="flex flex-col gap-1">
+      <button onclick="showPage('dashboard')" id="btn-dashboard"
+        class="nav-item active flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
+        <i class="lucide-layout-dashboard w-4 h-4"></i> Dashboard
+      </button>
+      <button onclick="showPage('orders')" id="btn-orders"
+        class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
+        <i class="lucide-package w-4 h-4"></i> Orders
+      </button>
+      <button onclick="showPage('admins')" id="btn-admins"
+        class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
+        <i class="lucide-shield w-4 h-4"></i> Admins
+      </button>
+      <button onclick="showPage('clients')" id="btn-clients"
+        class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
+        <i class="lucide-user-plus w-4 h-4"></i> Clients
+      </button>
+      <button onclick="showPage('whatsapp')" id="btn-whatsapp"
+        class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
+        <i class="lucide-smartphone w-4 h-4"></i> WhatsApp
+      </button>
+    </nav>
+
+    <div class="mt-auto px-2">
+      <p class="text-[10px] text-zinc-600 font-medium">Phase 1 - MVP</p>
+    </div>
+  </aside>
+
+  <!-- Main Area -->
+  <main class="flex-1 overflow-y-auto p-10">
+    <!-- DASHBOARD PAGE -->
+    <section id="page-dashboard">
+      <div class="mb-8">
+        <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <p class="text-zinc-500 text-sm">
+          Monitor order flow and system status in real-time
+        </p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-4 mb-8" id="stats-container">
+        <!-- Stats injected by JS -->
+      </div>
+
+      <div class="card overflow-hidden">
+        <div class="p-4 border-b border-zinc-800 font-semibold flex items-center justify-between">
+          <span>Recent Orders</span>
+          <i class="lucide-trending-up w-4 h-4 text-zinc-500"></i>
+        </div>
+        <table class="w-full text-sm text-left">
+          <thead class="bg-zinc-900/50 text-zinc-500 uppercase text-[10px] font-bold">
+            <tr>
+              <th class="px-6 py-3">Order ID</th>
+              <th class="px-6 py-3">Customer</th>
+              <th class="px-6 py-3">Assigned Admin</th>
+              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3">Time</th>
+            </tr>
+          </thead>
+          <tbody id="dashboard-orders-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ADMINS PAGE -->
+    <section id="page-admins" class="hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h2 class="text-3xl font-bold">Admins</h2>
+          <p class="text-zinc-500 text-sm">
+            Manage admins for order distribution
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="fetchGuardiansByOrg()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+            <i class="lucide-refresh-cw w-4 h-4"></i> Fetch by Organization
+          </button>
+          <button onclick="openModal('admin')"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+            <i class="lucide-plus w-4 h-4"></i> Add Admin
+          </button>
+        </div>
+      </div>
+      <div id="admins-list" class="grid grid-cols-3 gap-4">
+        <!-- Admin cards injected here -->
+      </div>
+    </section>
+
+    <!-- CLIENTS PAGE -->
+    <section id="page-clients" class="hidden">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h2 class="text-3xl font-bold">Clients</h2>
+          <p class="text-zinc-500 text-sm">
+            Manage authorized clients for the bot
+          </p>
+        </div>
+        <button onclick="openModal('client')"
+          class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2">
+          <i class="lucide-plus w-4 h-4"></i> Add Client
+        </button>
+      </div>
+      <div id="clients-list" class="grid grid-cols-3 gap-4">
+        <!-- Client cards injected here -->
+      </div>
+    </section>
+
+    <!-- WHATSAPP PAGE -->
+    <section id="page-whatsapp" class="hidden">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">WhatsApp Connection</h2>
+        <button onclick="logoutWA()"
+          class="text-red-500 border border-red-500/20 px-4 py-2 rounded-md text-xs hover:bg-red-500/10">
+          Disconnect
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-8">
+        <div class="card p-6">
+          <h3 class="font-bold text-sm mb-4">Connection Status</h3>
+          <div class="bg-zinc-900/50 p-4 rounded-lg flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+              <span class="text-zinc-500 text-sm">Status</span>
+              <span id="conn-status-text" class="text-red-500 text-sm font-bold flex items-center gap-2">●
+                Disconnected</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-zinc-500 text-sm">Phone Number</span>
+              <span id="conn-phone-text" class="text-zinc-300 text-sm font-mono">None</span>
+            </div>
+          </div>
+        </div>
+        <div class="card p-6 flex flex-col items-center">
+          <h3 class="font-bold text-sm mb-6 w-full text-left">
+            QR Code Login
+          </h3>
+          <div id="qr-container"
+            class="bg-white p-4 rounded-lg flex items-center justify-center min-h-[220px] min-w-[220px]">
+            <p class="text-black text-xs">Waiting for server...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for adding Admin/Client -->
+  <div id="data-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50">
+    <div class="card w-[400px] p-6 shadow-2xl">
+      <h3 id="modal-title" class="text-xl font-bold mb-4">Add New</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs text-zinc-500 block mb-1">Name</label>
+          <input type="text" id="m-name"
+            class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm outline-none focus:border-green-600" />
+        </div>
+        <div>
+          <label class="text-xs text-zinc-500 block mb-1">Phone Number (with country code)</label>
+          <input type="text" id="m-phone" placeholder="880123456789"
+            class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm outline-none focus:border-green-600" />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button onclick="closeModal()" class="flex-1 bg-zinc-800 py-2 rounded text-sm hover:bg-zinc-700">
+            Cancel
+          </button>
+          <button onclick="saveData()" class="flex-1 bg-green-600 py-2 rounded text-sm font-bold">
+            Save Record
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Overlay -->
+  <div id="login-overlay" class="fixed inset-0 bg-black z-[100] flex items-center justify-center hidden">
+    <div class="card w-80 p-6">
+      <h2 class="text-xl font-bold mb-6 text-center">Bot Login</h2>
+      <div class="space-y-4">
+        <input type="password" id="login-pass" placeholder="Master Password"
+          class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm outline-none focus:border-green-600">
+        <button onclick="doLogin()" class="w-full bg-green-600 py-2 rounded font-bold hover:bg-green-700">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    let currentModalType = "";
+    let authToken = localStorage.getItem('auth_token');
+
+    // --- AUTH ---
+    if (!authToken) {
+      document.getElementById('login-overlay').classList.remove('hidden');
+    }
+
+    async function doLogin() {
+      const password = document.getElementById('login-pass').value;
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+        location.reload();
+      } else {
+        alert(data.error || 'Login failed');
+      }
+    }
+
+    function getHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${authToken}`
+      };
+    }
+
+    // --- PAGE NAVIGATION ---
+    function showPage(id) {
+      document
+        .querySelectorAll("main > section")
+        .forEach((s) => s.classList.add("hidden"));
+      document.getElementById("page-" + id).classList.remove("hidden");
+
+      document
+        .querySelectorAll(".nav-item")
+        .forEach((n) => n.classList.remove("active"));
+      document.getElementById("btn-" + id).classList.add("active");
+
+      loadData(id);
+    }
+
+    // --- DATA LOADING ---
+    async function loadData(page) {
+      if (page === "dashboard") {
+        const stats = await fetch("/api/stats").then((r) => r.json());
+        // Removing orders fetch as table was deleted for bot repurposing
+        // const orders = await fetch("/api/orders").then((r) => r.json());
+
+        document.getElementById("stats-container").innerHTML = `
+                    <div class="card p-5">
+                        <p class="text-[10px] uppercase text-zinc-500 font-bold mb-1">Status</p>
+                        <h4 class="text-2xl font-bold text-green-500">${stats.status}</h4>
+                    </div>
+                    <div class="card p-5 border-l-2 border-l-green-600">
+                        <p class="text-[10px] uppercase text-zinc-500 font-bold mb-1">Guardians</p>
+                        <h4 class="text-2xl font-bold">${stats.activeAdmins}</h4>
+                    </div>
+                `;
+
+        document.getElementById("dashboard-orders-tbody").innerHTML = `
+                <tr><td colspan="5" class="px-6 py-10 text-center text-zinc-600">Attendance events will appear in WhatsApp logs</td></tr>
+          `;
+      }
+
+      if (page === "admins") {
+        const admins = await fetch("/api/admins").then((r) => r.json());
+        document.getElementById("admins-list").innerHTML = admins
+          .map(
+            (a) => `
+                    <div class="card p-4 flex justify-between items-center group transition-all hover:border-zinc-700">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center font-bold text-sm text-zinc-400 uppercase">${a.name ? a.name[0] : 'G'}</div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white leading-tight">${a.name || 'Guardian'}</h4>
+                                <p class="text-[11px] text-zinc-500 tracking-tight">+${a.phone}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">SYNCED</span>
+                            <button onclick="deleteEntry('admins', ${a.id})" class="p-2 bg-zinc-900/50 hover:bg-red-500/10 text-zinc-600 hover:text-red-500 rounded-md transition-all">
+                                <i class="lucide-trash-2 w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `,
+          )
+          .join("");
+      }
+
+      if (page === "clients") {
+        // Placeholder for clients as table was deleted
+        document.getElementById("clients-list").innerHTML = '<p class="text-zinc-500 italic p-4">Clients are managed by the school backend.</p>';
+      }
+    }
+
+    // --- MODAL LOGIC ---
+    function openModal(type) {
+      currentModalType = type;
+      document.getElementById("modal-title").innerText =
+        type === "admin" ? "Add New Guardian" : "Add New Client";
+      document.getElementById("data-modal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("data-modal").classList.add("hidden");
+      document.getElementById("m-name").value = "";
+      document.getElementById("m-phone").value = "";
+    }
+
+    async function saveData() {
+      const name = document.getElementById("m-name").value;
+      const phone = document.getElementById("m-phone").value;
+      if (!name || !phone) return alert("Fill all fields");
+
+      const endpoint =
+        currentModalType === "admin" ? "/api/admins" : "/api/clients";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ name, phone }),
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem('auth_token');
+        return location.reload();
+      }
+
+      closeModal();
+      loadData(currentModalType + "s");
+    }
+
+    async function fetchGuardiansByOrg() {
+      const orgId = prompt("Enter Organization ID:");
+      if (!orgId) return;
+
+      if (!confirm(`This will fetch all guardians for Organization #${orgId} from the backend and sync them to this bot. Continue?`)) return;
+
+      try {
+        // 1. Fetch from backend (assumed backend URL is shared or proxied, but bot.js has it)
+        // Since the browser might not reach the backend IP directly, we should ideally
+        // have a bot endpoint that proxies this, or the user manually enters it.
+        // For now, we'll try to reach the backend directly using the known URL.
+        const backendUrl = "http://192.168.0.106:8015";
+
+        const response = await fetch(`${backendUrl}/api/v1/organizations/guardian_sync_list/${orgId}/`);
+
+        if (!response.ok) throw new Error("Failed to fetch from backend. Ensure you are logged into the backend.");
+
+        const guardians = await response.json();
+        if (guardians.length === 0) return alert("No guardians found for this organization.");
+
+        // 2. Sync to Bot
+        const syncRes = await fetch("/api/sync-admins", {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ admins: guardians })
+        });
+
+        const syncData = await syncRes.json();
+        if (syncData.success) {
+          alert(`Successfully synced ${syncData.count} guardians.`);
+          loadData("admins");
+        } else {
+          alert("Sync failed: " + syncData.error);
+        }
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    // --- WHATSAPP LOGIC ---
+    socket.on("qr", (qr) => {
+      const container = document.getElementById("qr-container");
+      container.innerHTML = "";
+      container.classList.add("bg-white");
+      new QRCode(container, { text: qr, width: 180, height: 180 });
+    });
+
+    socket.on("connection_status", (data) => {
+      const text = document.getElementById("conn-status-text");
+      const phone = document.getElementById("conn-phone-text");
+      const qr = document.getElementById("qr-container");
+
+      if (data.status === "Connected") {
+        text.innerText = "● Connected";
+        text.className = "text-green-500 font-bold flex items-center gap-2";
+        phone.innerText = "+" + data.phone;
+        qr.classList.remove("bg-white");
+        qr.innerHTML = `<div class="text-green-600 flex flex-col items-center gap-2">
+                    <i class="lucide-check-circle w-12 h-12"></i>
+                    <p class="font-bold">Successfully Linked</p>
+                </div>`;
+      } else {
+        text.innerText = "● Disconnected";
+        text.className = "text-red-500 font-bold flex items-center gap-2";
+        phone.innerText = "None";
+      }
+    });
+
+    async function logoutWA() {
+      if (confirm("Disconnect device?"))
+        await fetch("/api/whatsapp/logout", {
+          method: "POST",
+          headers: getHeaders()
+        });
+    }
+    async function deleteEntry(type, id) {
+      if (
+        !confirm(`Are you sure you want to delete this ${type.slice(0, -1)}?`)
+      )
+        return;
+
+      const response = await fetch(`/api/${type}/${id}`, {
+        method: "DELETE",
+        headers: getHeaders()
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('auth_token');
+        return location.reload();
+      }
+
+      if (response.ok) {
+        loadData(type);
+      } else {
+        alert("Error deleting record");
+      }
+    }
+    // Init
+    showPage("dashboard");
+  </script>
+</body>
+
+</html>
