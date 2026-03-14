@@ -390,7 +390,7 @@
         // Since the browser might not reach the backend IP directly, we should ideally
         // have a bot endpoint that proxies this, or the user manually enters it.
         // For now, we'll try to reach the backend directly using the known URL.
-        const backendUrl = "http://192.168.0.106:8015";
+        const backendUrl = "https://skoolian.com";
 
         const response = await fetch(`${backendUrl}/api/v1/organizations/guardian_sync_list/${orgId}/`);
 
