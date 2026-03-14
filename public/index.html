@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>WhatsApp Bot | Order Automation</title>
+  <title>WhatsApp Bot | Skoolian</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -53,7 +53,7 @@
       <div class="leading-tight">
         <h1 class="font-bold text-sm">WhatsApp Bot</h1>
         <p class="text-[10px] text-zinc-500 uppercase tracking-wider">
-          Order Automation
+          Skoolian
         </p>
       </div>
     </div>
@@ -63,18 +63,18 @@
         class="nav-item active flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
         <i class="lucide-layout-dashboard w-4 h-4"></i> Dashboard
       </button>
-      <button onclick="showPage('orders')" id="btn-orders"
+      <!-- <button onclick="showPage('orders')" id="btn-orders"
         class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
         <i class="lucide-package w-4 h-4"></i> Orders
-      </button>
+      </button> -->
       <button onclick="showPage('admins')" id="btn-admins"
         class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
-        <i class="lucide-shield w-4 h-4"></i> Admins
+        <i class="lucide-shield w-4 h-4"></i> Guardians
       </button>
-      <button onclick="showPage('clients')" id="btn-clients"
+      <!-- <button onclick="showPage('clients')" id="btn-clients"
         class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
         <i class="lucide-user-plus w-4 h-4"></i> Clients
-      </button>
+      </button> -->
       <button onclick="showPage('whatsapp')" id="btn-whatsapp"
         class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white transition-all">
         <i class="lucide-smartphone w-4 h-4"></i> WhatsApp
@@ -101,7 +101,7 @@
         <!-- Stats injected by JS -->
       </div>
 
-      <div class="card overflow-hidden">
+      <!-- <div class="card overflow-hidden">
         <div class="p-4 border-b border-zinc-800 font-semibold flex items-center justify-between">
           <span>Recent Orders</span>
           <i class="lucide-trending-up w-4 h-4 text-zinc-500"></i>
@@ -118,16 +118,16 @@
           </thead>
           <tbody id="dashboard-orders-tbody"></tbody>
         </table>
-      </div>
+      </div> -->
     </section>
 
     <!-- ADMINS PAGE -->
     <section id="page-admins" class="hidden">
       <div class="flex justify-between items-end mb-8">
         <div>
-          <h2 class="text-3xl font-bold">Admins</h2>
+          <h2 class="text-3xl font-bold">Guardians</h2>
           <p class="text-zinc-500 text-sm">
-            Manage admins for order distribution
+            Manage guardians for order distribution
           </p>
         </div>
         <div class="flex items-center gap-2">
@@ -137,7 +137,7 @@
           </button>
           <button onclick="openModal('admin')"
             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2">
-            <i class="lucide-plus w-4 h-4"></i> Add Admin
+            <i class="lucide-plus w-4 h-4"></i> Add Guardians
           </button>
         </div>
       </div>
